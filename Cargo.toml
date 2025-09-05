@@ -1,9 +1,9 @@
 [package]
 name = "rust_pact"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
-description = "Rust rewrite of pypact (excluding tools.py)"
+description = "Pact smart contract client for kadena blockchain"
 
 # Specify your license. Example: MIT, Apache-2.0, or other SPDX identifier
 license = "MIT"
