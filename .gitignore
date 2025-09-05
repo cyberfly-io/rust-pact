@@ -1,0 +1,37 @@
+# Rust build and dependency files
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# VS Code settings
+.vscode/
+
+# MacOS system files
+.DS_Store
+
+# Node modules (if any)
+node_modules/
+
+# Python virtual environments (if any)
+venv/
+__pycache__/
+
+# Logs
+*.log
+
+# Misc
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Ignore by default
+.idea/
+*.iml
+
+# Coverage
+coverage/
+
+# By default, ignore everything in target/
+/target/*
+!/target/.gitkeep
