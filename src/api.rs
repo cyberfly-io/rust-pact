@@ -1,7 +1,7 @@
 // API module: command construction, signing, serialization
 // ...to be implemented...
 use crate::utils::{pull_check_hashs, pull_sig, mk_signer, KeyPair};
-use crate::crypto::{sign, attach_sig};
+use crate::crypto::{attach_sig};
 use serde_json::{json, Value};
 use chrono::Utc;
 

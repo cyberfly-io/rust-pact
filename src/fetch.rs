@@ -3,6 +3,10 @@ use crate::utils::{unique, get_headers, parse_res, KeyPair};
 use serde_json::{Value, json};
 use reqwest::blocking::Client;
 
+fn create_http_client() -> Client {
+    Client::new()
+}
+
 pub fn simple_poll_req_from_exec(exec_msg: &Value) -> Value {
     let cmds = exec_msg.get("cmds").and_then(|v| v.as_array()).expect("expected key 'cmds' in object");
     let rks: Vec<String> = cmds.iter().map(|cmd| cmd.get("hash").and_then(|h| h.as_str()).expect("malformed object, expected 'hash' key in every cmd").to_string()).collect();
@@ -48,7 +52,7 @@ pub fn make_prepare_cmd(cmd: &Value) -> Value {
 }
 
 pub fn fetch_send_raw(send_cmd: &Value, api_host: &str, debug: bool) -> reqwest::blocking::Response {
-    let client = Client::new();
+    let client = create_http_client();
     // If already in form {"cmds": [...]}, assume pre-prepared
     let prepared_cmds: Vec<Value> = if let Some(arr) = send_cmd.get("cmds").and_then(|v| v.as_array()) {
         arr.to_vec()
@@ -71,7 +75,7 @@ pub fn send(send_cmd: &Value, api_host: &str, debug: bool) -> Value {
 }
 
 pub fn fetch_spv_raw(spv_cmd: &Value, api_host: &str) -> reqwest::blocking::Response {
-    let client = Client::new();
+    let client = create_http_client();
     client.post(&format!("{}/spv", api_host))
         .json(spv_cmd)
         .headers(get_headers())
@@ -85,7 +89,7 @@ pub fn spv(spv_cmd: &Value, api_host: &str) -> Value {
 }
 
 pub fn fetch_local_raw(local_cmd: &Value, api_host: &str) -> reqwest::blocking::Response {
-    let client = Client::new();
+    let client = create_http_client();
     client.post(&format!("{}/api/v1/local", api_host))
         .json(local_cmd)
         .headers(get_headers())
@@ -99,7 +103,7 @@ pub fn local(local_cmd: &Value, api_host: &str) -> Value {
 }
 
 pub fn fetch_poll_raw(poll_cmd: &Value, api_host: &str) -> reqwest::blocking::Response {
-    let client = Client::new();
+    let client = create_http_client();
     client.post(&format!("{}/api/v1/poll", api_host))
         .json(poll_cmd)
         .headers(get_headers())
@@ -113,7 +117,7 @@ pub fn poll(poll_cmd: &Value, api_host: &str) -> Value {
 }
 
 pub fn fetch_listen_raw(listen_cmd: &Value, api_host: &str) -> reqwest::blocking::Response {
-    let client = Client::new();
+    let client = create_http_client();
     client.post(&format!("{}/api/v1/listen", api_host))
         .json(listen_cmd)
         .headers(get_headers())

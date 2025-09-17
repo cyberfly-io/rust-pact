@@ -1,10 +1,8 @@
-use blake2::{Digest};
 use blake2::digest::{Update, VariableOutput};
 use blake2::Blake2bVar;
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use hex;
 use ed25519_dalek::{Keypair, PublicKey, SecretKey, Signature, Signer, Verifier};
-use rand::rngs::OsRng;
 use serde_json::{json, Value};
 
 pub fn hex_to_bin(hex: &str) -> Vec<u8> {

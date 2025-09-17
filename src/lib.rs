@@ -8,7 +8,7 @@ pub mod tools;
 
 pub use crypto::{gen_key_pair, sign, verify, attach_sig, sign_map, b64_url_encoded_hash, hash_bin, hex_to_bin, bin_to_hex};
 pub use fetch::{send, listen, poll, local, spv, send_signed, simple_poll_req_from_exec, simple_listen_req_from_exec};
-pub use tools::{get_api_host};
+pub use tools::{get_api_host, token_transfer, crosschain_transfer, crosschain_complete, crosschain_transfer_full, CrossChainConfig, poll_create_spv};
 
 use serde_json::Value;
 use utils::KeyPair;

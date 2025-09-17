@@ -31,7 +31,7 @@ pub fn mk_exp(module_and_function: &str, namespace: Option<&str>, kwargs: Vec<(&
 	} else {
 		string.push_str(&format!("({} ", module_and_function));
 	}
-	for (key, value) in kwargs {
+	for (_key, value) in kwargs {
 		let val_str = match value {
 			serde_json::Value::String(ref s) if s.starts_with('(') || s.starts_with('[') => s.clone(),
 			_ => value.to_string(),
