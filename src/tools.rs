@@ -183,7 +183,8 @@ pub fn crosschain_transfer(token_address: &str,
                           mut key_pair: KeyPair,
                           source_chain_id: &str,
                           target_chain_id: &str,
-                          network_id: &str) -> Value {
+                          network_id: &str,
+                                                x_chain_v1: Option<bool>) -> Value {
     let api_host = get_api_host(network_id, source_chain_id);
 
     let code = if token_address != "coin" {
@@ -206,11 +207,19 @@ pub fn crosschain_transfer(token_address: &str,
         ])
     };
 
-    // Add capabilities (GAS + TRANSFER)
-    key_pair.clist = Some(vec![
-        json!({"name": "coin.GAS", "args": []}),
-        json!({"name": format!("{}.TRANSFER_XCHAIN", token_address), "args": [sender_account, receiver_account, amount, target_chain_id]})
-    ]);
+    // Normalize flag to default false when not provided
+    let x_chain_v1 = x_chain_v1.unwrap_or(false);
+
+    // Add capabilities (GAS + TRANSFER_XCHAIN) only when x_chain_v1 is enabled; otherwise, do not include these caps
+    if x_chain_v1 {
+        key_pair.clist = Some(vec![
+            json!({"name": "coin.GAS", "args": []}),
+            json!({"name": format!("{}.TRANSFER_XCHAIN", token_address), "args": [sender_account, receiver_account, amount, target_chain_id]})
+        ]);
+    } else {
+        // Ensure we don't accidentally reuse caps from a previous call; set empty clist
+        key_pair.clist = Some(vec![]);
+    }
 
     let creation_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as i64 - 100;
     let meta = lang::mk_meta(&format!("k:{}", key_pair.public_key), source_chain_id, 0.0000001, 60000, creation_time as u64, 15000);
@@ -302,7 +311,8 @@ pub fn crosschain_transfer_full(token_address: &str,
                                 source_chain_id: &str,
                                 target_chain_id: &str,
                                 network_id: &str,
-                                config: Option<CrossChainConfig>) -> Value {
+                                config: Option<CrossChainConfig>,
+                                x_chain_v1: Option<bool>) -> Value {
     let cfg = config.unwrap_or_default();
     let mut artifacts = json!({"status": "starting"});
     let start_time = SystemTime::now();
@@ -318,7 +328,18 @@ pub fn crosschain_transfer_full(token_address: &str,
 
     // 1. Initiate
     if cfg.verbose { println!("[xchain] initiating transfer..."); }
-    let init_res = crosschain_transfer(token_address, sender_account, receiver_account, receiver_public_key, amount, key_pair.clone(), source_chain_id, target_chain_id, network_id);
+    let init_res = crosschain_transfer(
+        token_address,
+        sender_account,
+        receiver_account,
+        receiver_public_key,
+        amount,
+        key_pair.clone(),
+        source_chain_id,
+        target_chain_id,
+        network_id,
+        x_chain_v1,
+    );
     let request_key = init_res.get("requestKeys").and_then(|v| v.as_array()).and_then(|arr| arr.get(0)).and_then(|v| v.as_str()).map(|s| s.to_string());
     artifacts["init_result"] = init_res.clone();
     if request_key.is_none() { artifacts["error"] = json!("missing request key from initiation"); return artifacts; }

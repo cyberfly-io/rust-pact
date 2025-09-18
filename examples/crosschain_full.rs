@@ -61,7 +61,8 @@ fn main() {
             source_chain_id,
             target_chain_id,
             network_id,
-            Some(config)
+            Some(config),
+            None
         )
     } else {
         // Mock result for demo - in real mode, this would be the actual aggregated JSON
