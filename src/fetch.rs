@@ -3,6 +3,12 @@ use crate::utils::{unique, get_headers, parse_res, KeyPair};
 use serde_json::{Value, json};
 use reqwest::blocking::Client;
 
+#[derive(Debug, Clone, Default)]
+pub struct LocalOptions {
+    pub preflight: Option<bool>,
+    pub signature_verification: Option<bool>,
+}
+
 fn create_http_client() -> Client {
     Client::new()
 }
@@ -88,18 +94,55 @@ pub fn spv(spv_cmd: &Value, api_host: &str) -> Value {
     parse_res(res)
 }
 
-pub fn fetch_local_raw(local_cmd: &Value, api_host: &str) -> reqwest::blocking::Response {
+pub fn fetch_local_raw(local_cmd: &Value, api_host: &str, options: Option<LocalOptions>) -> reqwest::blocking::Response {
     let client = create_http_client();
-    client.post(&format!("{}/api/v1/local", api_host))
+    let mut url = format!("{}/api/v1/local", api_host);
+    
+    // Build query string based on provided options
+    if let Some(opts) = options {
+        let mut query_params = Vec::new();
+        if let Some(pf) = opts.preflight {
+            query_params.push(format!("preflight={}", pf));
+        }
+        if let Some(sv) = opts.signature_verification {
+            query_params.push(format!("signatureVerification={}", sv));
+        }
+        
+        if !query_params.is_empty() {
+            url.push_str("?");
+            url.push_str(&query_params.join("&"));
+        }
+    }
+    
+    client.post(&url)
         .json(local_cmd)
         .headers(get_headers())
         .send()
         .expect("Failed to send request")
 }
 
-pub fn local(local_cmd: &Value, api_host: &str) -> Value {
-    let res = fetch_local_raw(local_cmd, api_host);
+// Primary function with options struct
+pub fn local_with_opts(local_cmd: &Value, api_host: &str, options: Option<LocalOptions>) -> Value {
+    let res = fetch_local_raw(local_cmd, api_host, options);
     parse_res(res)
+}
+
+// Default function without options (backward compatible)
+pub fn local(local_cmd: &Value, api_host: &str) -> Value {
+    local_with_opts(local_cmd, api_host, None)
+}
+
+// Convenience function for individual parameters
+pub fn local_with_options(local_cmd: &Value, api_host: &str, preflight: Option<bool>, signature_verification: Option<bool>) -> Value {
+    let options = if preflight.is_some() || signature_verification.is_some() {
+        Some(LocalOptions {
+            preflight,
+            signature_verification,
+        })
+    } else {
+        None
+    };
+    local_with_opts(local_cmd, api_host, options)
 }
 
 pub fn fetch_poll_raw(poll_cmd: &Value, api_host: &str) -> reqwest::blocking::Response {
