@@ -44,7 +44,7 @@ pub fn make_prepare_cmd(cmd: &Value) -> Value {
         let meta = cmd.get("meta").cloned().unwrap_or(json!({}));
         let network_id = cmd.get("networkId").and_then(|v| v.as_str()).map(|s| s.to_string());
         let nonce = cmd.get("nonce").and_then(|v| v.as_str()).map(|s| s.to_string());
-        let key_pairs: Vec<KeyPair> = cmd.get("keyPairs").and_then(|v| v.as_array()).map(|arr| arr.iter().map(value_to_keypair).collect()).unwrap_or_default();
+        let key_pairs: Option<Vec<KeyPair>> = cmd.get("keyPairs").and_then(|v| v.as_array()).map(|arr| arr.iter().map(value_to_keypair).collect());
         return prepare_cont_cmd(pact_id, rollback, step, proof, env_data, meta, network_id, nonce, key_pairs);
     }
     // Exec command default
@@ -53,7 +53,7 @@ pub fn make_prepare_cmd(cmd: &Value) -> Value {
     let meta = cmd.get("meta").cloned().unwrap_or(json!({}));
     let network_id = cmd.get("networkId").and_then(|v| v.as_str()).map(|s| s.to_string());
     let nonce = cmd.get("nonce").and_then(|v| v.as_str()).map(|s| s.to_string());
-    let key_pairs: Vec<KeyPair> = cmd.get("keyPairs").and_then(|v| v.as_array()).map(|arr| arr.iter().map(value_to_keypair).collect()).unwrap_or_default();
+    let key_pairs: Option<Vec<KeyPair>> = cmd.get("keyPairs").and_then(|v| v.as_array()).map(|arr| arr.iter().map(value_to_keypair).collect());
     prepare_exec_cmd(pact_code, env_data, meta, network_id, nonce, key_pairs)
 }
 

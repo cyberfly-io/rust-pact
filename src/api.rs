@@ -6,7 +6,10 @@ use serde_json::{json, Value};
 use chrono::Utc;
 
 pub fn filter_sig(sig: &Value) -> bool {
-	sig.get("sig").is_some()
+	// Filter out signatures where sig is null or missing
+	sig.get("sig")
+		.map(|v| !v.is_null())
+		.unwrap_or(false)
 }
 
 pub fn mk_single_cmd(sigs: &[Value], cmd: &str) -> Value {
@@ -17,8 +20,9 @@ pub fn mk_single_cmd(sigs: &[Value], cmd: &str) -> Value {
 	})
 }
 
-pub fn prepare_exec_cmd(pact_code: &str, env_data: Value, meta: Value, network_id: Option<String>, nonce: Option<String>, key_pairs: Vec<KeyPair>) -> Value {
-	let signers: Vec<Value> = key_pairs.iter().map(|kp| mk_signer(kp)).collect();
+pub fn prepare_exec_cmd(pact_code: &str, env_data: Value, meta: Value, network_id: Option<String>, nonce: Option<String>, key_pairs: Option<Vec<KeyPair>>) -> Value {
+	let kp_vec = key_pairs.unwrap_or_default();
+	let signers: Vec<Value> = kp_vec.iter().map(|kp| mk_signer(kp)).collect();
 	let cmd_json = json!({
 		"networkId": network_id,
 		"payload": {
@@ -32,13 +36,14 @@ pub fn prepare_exec_cmd(pact_code: &str, env_data: Value, meta: Value, network_i
 		"nonce": nonce.unwrap_or_else(|| Utc::now().to_rfc3339())
 	});
 	let cmd = cmd_json.to_string();
-	let kp_json: Vec<Value> = key_pairs.iter().map(|kp| json!({"publicKey": kp.public_key, "secretKey": kp.secret_key})).collect();
+	let kp_json: Vec<Value> = kp_vec.iter().map(|kp| json!({"publicKey": kp.public_key, "secretKey": kp.secret_key})).collect();
 	let sigs = attach_sig(&cmd, &kp_json);
 	mk_single_cmd(&sigs, &cmd)
 }
 
-pub fn prepare_cont_cmd(pact_id: &str, rollback: bool, step: u64, proof: Option<String>, env_data: Value, meta: Value, network_id: Option<String>, nonce: Option<String>, key_pairs: Vec<KeyPair>) -> Value {
-	let signers: Vec<Value> = key_pairs.iter().map(|kp| mk_signer(kp)).collect();
+pub fn prepare_cont_cmd(pact_id: &str, rollback: bool, step: u64, proof: Option<String>, env_data: Value, meta: Value, network_id: Option<String>, nonce: Option<String>, key_pairs: Option<Vec<KeyPair>>) -> Value {
+	let kp_vec = key_pairs.unwrap_or_default();
+	let signers: Vec<Value> = kp_vec.iter().map(|kp| mk_signer(kp)).collect();
 	let cmd_json = json!({
 		"networkId": network_id,
 		"payload": {
@@ -55,7 +60,7 @@ pub fn prepare_cont_cmd(pact_id: &str, rollback: bool, step: u64, proof: Option<
 		"nonce": nonce.unwrap_or_else(|| Utc::now().to_rfc3339())
 	});
 	let cmd = cmd_json.to_string();
-	let kp_json: Vec<Value> = key_pairs.iter().map(|kp| json!({"publicKey": kp.public_key, "secretKey": kp.secret_key})).collect();
+	let kp_json: Vec<Value> = kp_vec.iter().map(|kp| json!({"publicKey": kp.public_key, "secretKey": kp.secret_key})).collect();
 	let sigs = attach_sig(&cmd, &kp_json);
 	mk_single_cmd(&sigs, &cmd)
 }

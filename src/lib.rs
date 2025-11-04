@@ -17,11 +17,11 @@ use utils::KeyPair;
 pub struct Pact;
 
 impl Pact {
-	pub fn prepare_exec_cmd(pact_code: &str, env_data: Value, meta: Value, network_id: Option<String>, nonce: Option<String>, key_pairs: Vec<KeyPair>) -> Value {
+	pub fn prepare_exec_cmd(pact_code: &str, env_data: Value, meta: Value, network_id: Option<String>, nonce: Option<String>, key_pairs: Option<Vec<KeyPair>>) -> Value {
 		api::prepare_exec_cmd(pact_code, env_data, meta, network_id, nonce, key_pairs)
 	}
 
-	pub fn prepare_cont_cmd(pact_id: &str, rollback: bool, step: u64, proof: Option<String>, env_data: Value, meta: Value, network_id: Option<String>, nonce: Option<String>, key_pairs: Vec<KeyPair>) -> Value {
+	pub fn prepare_cont_cmd(pact_id: &str, rollback: bool, step: u64, proof: Option<String>, env_data: Value, meta: Value, network_id: Option<String>, nonce: Option<String>, key_pairs: Option<Vec<KeyPair>>) -> Value {
 		api::prepare_cont_cmd(pact_id, rollback, step, proof, env_data, meta, network_id, nonce, key_pairs)
 	}
 

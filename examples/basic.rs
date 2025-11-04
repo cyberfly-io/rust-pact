@@ -25,7 +25,7 @@ fn main() {
         meta.clone(),
         Some("testnet04".to_string()),
         None,
-        key_pairs.clone()
+        Some(key_pairs.clone())
     );
     println!("Exec Command: {}", exec_cmd);
 
@@ -39,7 +39,7 @@ fn main() {
         meta.clone(),
         Some("testnet04".to_string()),
         None,
-        key_pairs.clone()
+        Some(key_pairs.clone())
     );
     println!("Cont Command: {}", cont_cmd);
 
