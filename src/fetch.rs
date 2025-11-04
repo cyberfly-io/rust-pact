@@ -114,8 +114,11 @@ pub fn fetch_local_raw(local_cmd: &Value, api_host: &str, options: Option<LocalO
         }
     }
     
+    // Match Python implementation: prepare the command before posting
+    let prepared_cmd = make_prepare_cmd(local_cmd);
+    
     client.post(&url)
-        .json(local_cmd)
+        .json(&prepared_cmd)
         .headers(get_headers())
         .send()
         .expect("Failed to send request")
